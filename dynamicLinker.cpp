@@ -5,8 +5,6 @@
 
 #include "dynamicLinker.hpp"
 
-int f() { return 0;}
-
 namespace dynamicLinker {
 
   dynamicLinker::dynamicLinker( std::string path ) : libPath(path) {
@@ -15,11 +13,11 @@ namespace dynamicLinker {
   bool dynamicLinker::open() {
     lib = std::make_unique<_void>( dlopen( libPath.c_str(), RTLD_NOW | RTLD_LOCAL ) );
 
-
     if ( lib->ptr() == nullptr ) {
       lib = nullptr;
-      return false;
+      throw openException();
     }
+
     return true;
   }
 
@@ -37,6 +35,21 @@ namespace dynamicLinker {
 
   dynamicLinker::~dynamicLinker() {
     this->explicitClose();
+  }
+
+  dynamicLinker::_void::_void( void * ptr ) : myself(ptr) {}
+
+  dynamicLinker::_void::~_void() {
+    if( myself != nullptr )
+      free(myself);
+  }
+
+  void * dynamicLinker::_void::ptr() const {
+    return myself;
+  }
+
+  void dynamicLinker::_void::null() {
+    myself = nullptr;
   }
 
 }

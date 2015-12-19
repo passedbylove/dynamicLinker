@@ -3,18 +3,25 @@ CXX = clang++
 CXXFLAGS = -Wall -Wextra -Werror -std=c++14
 LDLIBS = -ldl
 
+OS_NAME = $(shell uname -s)
+ifeq ($(OS_NAME), Darwin)
+  SONAME = -install_name
+else
+  SONAME = -soname
+endif
+
 .PHONY: all clean
 
-all: test dynamicLinker.o testLib.so.1.0 Makefile
-
-test: dynamicLinker.o dynamicLinker.hpp test.cpp Makefile testLib.so.1.0
-	$(CXX) $(CXXFLAGS) test.cpp dynamicLinker.o -o test $(LDLIBS)
-
-testLib.so.1.0: testLib.c Makefile
-	$(CC) -shared -Wl,-soname,testLib.so.1 -o testLib.so.1.0 -Wall -Wextra -pedantic -fPIC testLib.c
+all: dynamicLinker.o Makefile
 
 dynamicLinker.o: dynamicLinker.cpp dynamicLinker.hpp Makefile
 	$(CXX) $(CXXFLAGS) dynamicLinker.cpp -c
 
 clean:
-	rm -f test dynamicLinker.o testLib.so.1.0
+	rm -f test dynamicLinker.o testLib.lib
+
+test: dynamicLinker.o dynamicLinker.hpp test.cpp Makefile test.lib
+	$(CXX) $(CXXFLAGS) test.cpp dynamicLinker.o -o test $(LDLIBS)
+
+test.lib: testLib.c Makefile
+	$(CC) -shared -Wl,$(SONAME),test.lib -o test.lib -Wall -Wextra -pedantic -fPIC testLib.c

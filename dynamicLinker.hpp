@@ -13,28 +13,63 @@
 #include <iostream>
 #include <dlfcn.h>
 #include <functional>
+#include <stdexcept>
 
 namespace dynamicLinker {
 
-  class _void {
-  private:
-    void * myself = nullptr;
+  class dynamicLinkerException : public std::runtime_error {
   public:
-    _void( void * ptr ) : myself(ptr) {}
-    ~_void() {
-      if( myself != nullptr )
-        free(myself);
-    }
-    void * ptr() const {
-      return myself;
-    }
-    void null() {
-      myself = nullptr;
-    }
+    dynamicLinkerException ( const std::string& what_arg ) :
+      std::runtime_error( what_arg ) {}
+    dynamicLinkerException ( const char* what_arg ) :
+      std::runtime_error( what_arg ) {}
+  };
+
+  class openException : public dynamicLinkerException {
+  public:
+    openException() : dynamicLinkerException("Cannot open dynamic library: " + std::string(dlerror())) {}
+  };
+
+  class symbolException : public dynamicLinkerException {
+  public:
+    symbolException() : dynamicLinkerException("Cannot find symbol: " + std::string(dlerror())) {}
+  };
+
+  class closedException : public dynamicLinkerException {
+  public:
+    closedException() : dynamicLinkerException("Dynamic library was closed. Cannot run function from it!") {}
   };
 
   class dynamicLinker {
   private:
+
+    class _void {
+    private:
+      void * myself = nullptr;
+    public:
+      _void( void * );
+      ~_void();
+      void * ptr() const;
+      void null();
+    };
+
+    template<typename R, typename A> class dlSymbol {
+    private:
+      std::function< R(A) > sym = nullptr;
+      dynamicLinker &parent;
+    public:
+      dlSymbol( dynamicLinker &p, std::function< R(A) > s )
+        : sym(s), parent(p) {}
+      R operator()(A arg) {
+        if( parent.lib == nullptr )
+          throw closedException();
+        return sym(arg);
+      }
+      std::function< R(A) > raw() {
+        return sym;
+      }
+    };
+
     std::string libPath = "";
     std::unique_ptr<_void> lib = nullptr;
   public:
@@ -42,8 +77,12 @@ namespace dynamicLinker {
     ~dynamicLinker();
     bool open();
     bool explicitClose();
-    template<typename T> std::function<T> getFunction( std::string name ) {
-      return std::function<T>(reinterpret_cast< T * >( dlsym( lib->ptr(), name.c_str() ) ));
+    template<typename R, typename A> dlSymbol<R,A> getFunction( std::string name ) {
+      auto sym = dlSymbol<R,A>( *this, std::function< R(A) >(reinterpret_cast<  R(*)(A)  >(  dlsym(lib->ptr(), name.c_str())  )) );
+      if( sym.raw() == nullptr )
+        throw symbolException();
+      return sym;
     }
   };
+
 };
