@@ -14,8 +14,6 @@
 #include <dlfcn.h>
 #include <functional>
 #include <stdexcept>
-#include <unordered_map>
-#include <cassert>
 
 namespace dynamicLinker {
 
