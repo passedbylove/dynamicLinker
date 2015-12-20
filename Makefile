@@ -1,6 +1,6 @@
 CC = clang
 CXX = clang++
-CXXFLAGS = -Wall -Wextra -Werror -std=c++14 -g
+CXXFLAGS = -Wall -Wextra -Werror -std=c++11
 LDLIBS = -ldl
 
 OS_NAME = $(shell uname -s)

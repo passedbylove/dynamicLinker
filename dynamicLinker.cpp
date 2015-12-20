@@ -16,7 +16,10 @@ namespace dynamicLinker {
   }
 
   bool dynamicLinker::open() {
-    lib = std::make_unique<_void>( dlopen( libPath.c_str(), RTLD_NOW | RTLD_LOCAL ) );
+    // C++14:
+    // lib = std::make_unique<_void>( dlopen( libPath.c_str(), RTLD_NOW | RTLD_LOCAL ) );
+    _void * v = new _void( dlopen( libPath.c_str(), RTLD_NOW | RTLD_LOCAL ) );
+    lib = std::unique_ptr<_void>( v );
 
     if ( lib->ptr() == nullptr ) {
       lib = nullptr;
