@@ -9,8 +9,8 @@ void openException_test1() {
 
   try {
     dl->open();
-    auto f = dl->getFunction<int, int>("doubleIt");
-    std::cout << f( 4 ) << std::endl;
+    auto f = dl->getFunction<int, int, int>("sum");
+    std::cout << f( 2, 3 ) << std::endl;
   } catch( dynamicLinker::dynamicLinkerException e ) {
     std::cerr << e.what() << std::endl;
   }
@@ -22,8 +22,8 @@ void symbolException_test1() {
 
   try {
     dl->open();
-    auto f = dl->getFunction<int, int>("doubleIt_");
-    std::cout << f( 4 ) << std::endl;
+    auto f = dl->getFunction<int, int, int>("sum_");
+    std::cout << f( 2, 3 ) << std::endl;
   } catch( dynamicLinker::dynamicLinkerException e ) {
     std::cerr << e.what() << std::endl;
   }
@@ -34,8 +34,8 @@ void working_test1() {
   auto dl = dynamicLinker::dynamicLinker::make_new(path);
   try {
     dl->open();
-    auto f = dl->getFunction<int, int>("doubleIt");
-    std::cout << f( 4 ) << std::endl;
+    auto f = dl->getFunction<int, int, int>("sum");
+    std::cout << f( 2, 3 ) << std::endl;
   } catch( dynamicLinker::dynamicLinkerException e ) {
     std::cerr << e.what() << std::endl;
   }
@@ -48,9 +48,9 @@ void working_test2() {
     {
       auto dl = dynamicLinker::dynamicLinker::make_new(path);
       dl->open();
-      auto f = dl->getFunction<int, int>("doubleIt");
+      auto f = dl->getFunction<int, int, int>("sum");
       dl.reset();  // dl is not deleted, because f have shared_ptr to it
-      std::cout << f( 4 ) << std::endl;
+      std::cout << f( 2, 3 ) << std::endl;
     }
   } catch( dynamicLinker::dynamicLinkerException e ) {
     std::cerr << e.what() << std::endl;
