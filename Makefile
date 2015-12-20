@@ -1,6 +1,6 @@
 CC = clang
 CXX = clang++
-CXXFLAGS = -Wall -Wextra -Werror -std=c++14
+CXXFLAGS = -Wall -Wextra -Werror -std=c++14 -g
 LDLIBS = -ldl
 
 OS_NAME = $(shell uname -s)
@@ -18,7 +18,7 @@ dynamicLinker.o: dynamicLinker.cpp dynamicLinker.hpp Makefile
 	$(CXX) $(CXXFLAGS) dynamicLinker.cpp -c
 
 clean:
-	rm -f test dynamicLinker.o testLib.lib
+	rm -f test dynamicLinker.o test.lib
 
 test: dynamicLinker.o dynamicLinker.hpp test.cpp Makefile test.lib
 	$(CXX) $(CXXFLAGS) test.cpp dynamicLinker.o -o test $(LDLIBS)

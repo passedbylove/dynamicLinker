@@ -10,31 +10,33 @@ namespace dynamicLinker {
   dynamicLinker::dynamicLinker( std::string path ) : libPath(path) {
   }
 
+  std::shared_ptr<dynamicLinker> dynamicLinker::make_new( std::string path ) {
+    auto x = new dynamicLinker(path);
+    return std::shared_ptr<dynamicLinker>(x);
+  }
+
   bool dynamicLinker::open() {
     lib = std::make_unique<_void>( dlopen( libPath.c_str(), RTLD_NOW | RTLD_LOCAL ) );
 
     if ( lib->ptr() == nullptr ) {
       lib = nullptr;
-      throw openException();
+      char* err = dlerror();
+      std::string s = (err == nullptr) ? "FATAL ERROR: no error!" : std::string(err);
+      throw openException(s);
     }
 
-    return true;
-  }
-
-  bool dynamicLinker::explicitClose() {
-    if( lib != nullptr ) {
-      if( dlclose( lib->ptr() ) < 0 ) {
-        // maybe now we should free lib->ptr() ?
-        return false;
-      }
-      lib->null();
-      lib = nullptr;
-    }
     return true;
   }
 
   dynamicLinker::~dynamicLinker() {
-    this->explicitClose();
+    if( lib != nullptr ) {
+      if( dlclose( lib->ptr() ) < 0 ) {
+        // maybe now we should free lib->ptr() ?
+        return;
+      }
+      lib->null();
+      lib = nullptr;
+    }
   }
 
   dynamicLinker::_void::_void( void * ptr ) : myself(ptr) {}

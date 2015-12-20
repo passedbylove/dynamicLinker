@@ -5,7 +5,7 @@
 
 void openException_test1() {
   const std::string path = "./test_.lib";
-  auto dl = std::make_unique<dynamicLinker::dynamicLinker>(path);
+  auto dl = dynamicLinker::dynamicLinker::make_new(path);
 
   try {
     dl->open();
@@ -18,7 +18,7 @@ void openException_test1() {
 
 void symbolException_test1() {
   const std::string path = "./test.lib";
-  auto dl = std::make_unique<dynamicLinker::dynamicLinker>(path);
+  auto dl = dynamicLinker::dynamicLinker::make_new(path);
 
   try {
     dl->open();
@@ -29,40 +29,29 @@ void symbolException_test1() {
   }
 }
 
-void closedException_test1() {
-  const std::string path = "./test.lib";
-  auto dl = std::make_unique<dynamicLinker::dynamicLinker>(path);
-
-  try {
-    dl->open();
-    auto f = dl->getFunction<int, int>("doubleIt");
-    dl->explicitClose();
-    std::cout << f( 4 ) << std::endl;
-  } catch( dynamicLinker::dynamicLinkerException e ) {
-    std::cerr << e.what() << std::endl;
-  }
-}
-
-void closedException_test2() {
-  const std::string path = "./test.lib";
-  auto dl = new dynamicLinker::dynamicLinker(path);
-  try {
-    dl->open();
-    auto f = dl->getFunction<int, int>("doubleIt");
-    delete dl;
-    std::cout << f( 4 ) << std::endl;
-  } catch( dynamicLinker::dynamicLinkerException e ) {
-    std::cerr << e.what() << std::endl;
-  }
-}
-
 void working_test1() {
   const std::string path = "./test.lib";
-  auto dl = new dynamicLinker::dynamicLinker(path);
+  auto dl = dynamicLinker::dynamicLinker::make_new(path);
   try {
     dl->open();
     auto f = dl->getFunction<int, int>("doubleIt");
     std::cout << f( 4 ) << std::endl;
+  } catch( dynamicLinker::dynamicLinkerException e ) {
+    std::cerr << e.what() << std::endl;
+  }
+}
+
+void working_test2() {
+  const std::string path = "./test.lib";
+
+  try {
+    {
+      auto dl = dynamicLinker::dynamicLinker::make_new(path);
+      dl->open();
+      auto f = dl->getFunction<int, int>("doubleIt");
+      dl.reset();  // dl is not deleted, because f have shared_ptr to it
+      std::cout << f( 4 ) << std::endl;
+    }
   } catch( dynamicLinker::dynamicLinkerException e ) {
     std::cerr << e.what() << std::endl;
   }
@@ -72,9 +61,8 @@ int main() {
 
   openException_test1();
   symbolException_test1();
-  closedException_test1();
-  closedException_test2();
   working_test1();
+  working_test2();
 
   return 0;
 }

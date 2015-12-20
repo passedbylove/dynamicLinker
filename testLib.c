@@ -1,3 +1,3 @@
 int doubleIt( int x ) {
-  return 2*x;
+  return x*2;
 }

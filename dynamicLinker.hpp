@@ -14,6 +14,8 @@
 #include <dlfcn.h>
 #include <functional>
 #include <stdexcept>
+#include <unordered_map>
+#include <cassert>
 
 namespace dynamicLinker {
 
@@ -27,20 +29,20 @@ namespace dynamicLinker {
 
   class openException : public dynamicLinkerException {
   public:
-    openException() : dynamicLinkerException("Cannot open dynamic library: " + std::string(dlerror())) {}
+    openException(std::string s) : dynamicLinkerException("ERROR: Cannot open dynamic library: " + s) {}
   };
 
   class symbolException : public dynamicLinkerException {
   public:
-    symbolException() : dynamicLinkerException("Cannot find symbol: " + std::string(dlerror())) {}
+    symbolException(std::string s) : dynamicLinkerException("ERROR: Cannot find symbol: " + s) {}
   };
 
   class closedException : public dynamicLinkerException {
   public:
-    closedException() : dynamicLinkerException("Dynamic library was closed. Cannot run function from it!") {}
+    closedException() : dynamicLinkerException("ERROR: Library was not opened!") {}
   };
 
-  class dynamicLinker {
+  class dynamicLinker : public std::enable_shared_from_this<dynamicLinker> {
   private:
 
     class _void {
@@ -53,16 +55,15 @@ namespace dynamicLinker {
       void null();
     };
 
+
     template<typename R, typename A> class dlSymbol {
     private:
       std::function< R(A) > sym = nullptr;
-      dynamicLinker &parent;
+      std::shared_ptr<dynamicLinker> parent = nullptr;
     public:
-      dlSymbol( dynamicLinker &p, std::function< R(A) > s )
+      dlSymbol( std::shared_ptr<dynamicLinker> p, std::function< R(A) > s )
         : sym(s), parent(p) {}
       R operator()(A arg) {
-        if( parent.lib == nullptr )
-          throw closedException();
         return sym(arg);
       }
       std::function< R(A) > raw() {
@@ -70,17 +71,27 @@ namespace dynamicLinker {
       }
     };
 
+
     std::string libPath = "";
     std::unique_ptr<_void> lib = nullptr;
-  public:
+    dynamicLinker();
     dynamicLinker( std::string );
+  public:
+    static std::shared_ptr<dynamicLinker> make_new( std::string );
     ~dynamicLinker();
     bool open();
-    bool explicitClose();
     template<typename R, typename A> dlSymbol<R,A> getFunction( std::string name ) {
-      auto sym = dlSymbol<R,A>( *this, std::function< R(A) >(reinterpret_cast<  R(*)(A)  >(  dlsym(lib->ptr(), name.c_str())  )) );
-      if( sym.raw() == nullptr )
-        throw symbolException();
+
+      if( lib == nullptr )
+        throw closedException();
+
+      auto sym = dlSymbol<R,A>( shared_from_this(), std::function< R(A) >(reinterpret_cast<  R(*)(A)  >(  dlsym(lib->ptr(), name.c_str())  )) );
+
+      if( sym.raw() == nullptr ) {
+        char* err = dlerror();
+        std::string s = (err == nullptr) ? "FATAL ERROR: No error!" : std::string(err);
+        throw symbolException(s);
+      }
       return sym;
     }
   };
