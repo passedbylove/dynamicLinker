@@ -22,6 +22,7 @@ clean:
 
 test: dynamicLinker.o dynamicLinker.hpp test.cpp Makefile test.lib
 	$(CXX) $(CXXFLAGS) test.cpp dynamicLinker.o -o test $(LDLIBS)
+	./test
 
 test.lib: testLib.c Makefile
 	$(CC) -shared -Wl,$(SONAME),test.lib -o test.lib -Wall -Wextra -pedantic -fPIC testLib.c

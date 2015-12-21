@@ -5,7 +5,9 @@
 
 typedef int sum_type ( int x, int y );
 
-void openException_test1() {
+bool openException_test1() {
+  bool catched = false;
+
   const std::string path = "./test_.lib";
   auto dl = dynamicLinker::dynamicLinker::make_new(path);
 
@@ -14,11 +16,16 @@ void openException_test1() {
     auto f = dl->getFunction< sum_type >("sum");
     std::cout << f( 2, 3 ) << std::endl;
   } catch( dynamicLinker::dynamicLinkerException e ) {
-    std::cerr << e.what() << std::endl;
+    std::cerr << "OK! Catched error from dl: " << e.what() << std::endl;
+    catched = true;
   }
+
+  return catched;
 }
 
-void symbolException_test1() {
+bool symbolException_test1() {
+  bool catched = false;
+
   const std::string path = "./test.lib";
   auto dl = dynamicLinker::dynamicLinker::make_new(path);
 
@@ -27,23 +34,33 @@ void symbolException_test1() {
     auto f = dl->getFunction< sum_type >("sum_");
     std::cout << f( 2, 3 ) << std::endl;
   } catch( dynamicLinker::dynamicLinkerException e ) {
-    std::cerr << e.what() << std::endl;
+    std::cerr << "OK! Catched error from dl: " << e.what() << std::endl;
+    catched = true;
   }
+
+  return catched;
 }
 
-void working_test1() {
+int working_test1() {
+  int result = 0;
+
   const std::string path = "./test.lib";
+
   auto dl = dynamicLinker::dynamicLinker::make_new(path);
   try {
     dl->open();
     auto f = dl->getFunction< sum_type >("sum");
-    std::cout << f( 2, 3 ) << std::endl;
+    result = f( 2, 3 );
   } catch( dynamicLinker::dynamicLinkerException e ) {
     std::cerr << e.what() << std::endl;
   }
+
+  return result;
 }
 
-void working_test2() {
+int working_test2() {
+  int result = 0;
+
   const std::string path = "./test.lib";
 
   try {
@@ -52,19 +69,27 @@ void working_test2() {
       dl->open();
       auto f = dl->getFunction< sum_type >("sum");
       dl.reset();  // dl is not deleted, because f have shared_ptr to it
-      std::cout << f( 2, 3 ) << std::endl;
+      result = f( 2, 3 );
     }
   } catch( dynamicLinker::dynamicLinkerException e ) {
     std::cerr << e.what() << std::endl;
   }
+
+  return result;
 }
 
 int main() {
 
-  openException_test1();
-  symbolException_test1();
-  working_test1();
-  working_test2();
+  int value = 5;
+
+  if( !openException_test1() )
+    return 1;
+  if( !symbolException_test1() )
+    return 2;
+  if( working_test1() != value )
+    return 3;
+  if ( working_test2() != value )
+    return 4;
 
   return 0;
 }
