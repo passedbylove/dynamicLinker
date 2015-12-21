@@ -54,7 +54,9 @@ namespace dynamicLinker {
     };
 
 
-    template<typename R, typename ...A> class dlSymbol {
+    template<typename T> class dlSymbol {};
+
+    template<typename R, typename ...A> class dlSymbol< R(A...) >  {
     private:
       std::function< R(A...) > sym = nullptr;
       std::shared_ptr<dynamicLinker> parent = nullptr;
@@ -78,12 +80,12 @@ namespace dynamicLinker {
     static std::shared_ptr<dynamicLinker> make_new( std::string );
     ~dynamicLinker();
     bool open();
-    template<typename R, typename ...A> dlSymbol<R,A...> getFunction( std::string name ) {
+    template<typename T> dlSymbol<T> getFunction( std::string name ) {
 
       if( lib == nullptr )
         throw closedException();
 
-      auto sym = dlSymbol<R,A...>( shared_from_this(), std::function< R(A...) >(reinterpret_cast<  R(*)(A...)  >(  dlsym(lib->ptr(), name.c_str())  )) );
+      auto sym = dlSymbol<T>( shared_from_this(), std::function< T >(reinterpret_cast<  T*  >(  dlsym(lib->ptr(), name.c_str())  )) );
 
       if( sym.raw() == nullptr ) {
         char* err = dlerror();
