@@ -17,7 +17,10 @@ You **need** compiler with full C++11 support.
 
 You can also run ```make test``` ( or ```make test CXX=g++ CC=gcc``` ) after building, to check if dynamicLinker will be working for you. It will run simple test code ( which will also catch some exceptions ), and if make doesn't error - it's OK.
 
+There is also ```make clean``` which will remove all produced binaries that are in this directory. ( It won't remove */usr/local/lib/libdynamicLinker.a*! )
 
 ## Documentation
 
 **TODO** :-1:
+
+You can check out test.cpp for example usage.

@@ -15,19 +15,22 @@ else
   SONAME = -soname
 endif
 
-.PHONY: all clean
+.PHONY: all clean install
 
-all: dynamicLinker.a Makefile
+all: libdynamicLinker.a Makefile
 
-dynamicLinker.a: dynamicLinker.cpp dynamicLinker.hpp Makefile
+libdynamicLinker.a: dynamicLinker.cpp dynamicLinker.hpp Makefile
 	$(CXX) $(CXXFLAGS) dynamicLinker.cpp -c
 	ar rsc libdynamicLinker.a dynamicLinker.o
+
+install: libdynamicLinker.a Makefile
+	cp libdynamicLinker.a /usr/local/lib/libdynamicLinker.a
 
 clean:
 	rm -rf test dynamicLinker.o libdynamicLinker.a test.lib test.dSYM
 
 test: libdynamicLinker.a dynamicLinker.hpp test.cpp Makefile test.lib
-	$(CXX) $(CXXFLAGS) test.cpp -o test -L. -ldynamicLinker $(LDLIBS)
+	$(CXX) $(CXXFLAGS) test.cpp -o test -ldynamicLinker $(LDLIBS)
 	./test
 
 test.lib: testLib.c Makefile

@@ -2,3 +2,4 @@ test
 test.lib
 dynamicLinker.o
 test.dSYM
+libdynamicLinker.a
