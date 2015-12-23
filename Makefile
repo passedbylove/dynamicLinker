@@ -17,16 +17,17 @@ endif
 
 .PHONY: all clean
 
-all: dynamicLinker.o Makefile
+all: dynamicLinker.a Makefile
 
-dynamicLinker.o: dynamicLinker.cpp dynamicLinker.hpp Makefile
+dynamicLinker.a: dynamicLinker.cpp dynamicLinker.hpp Makefile
 	$(CXX) $(CXXFLAGS) dynamicLinker.cpp -c
+	ar rsc libdynamicLinker.a dynamicLinker.o
 
 clean:
-	rm -f test dynamicLinker.o test.lib
+	rm -rf test dynamicLinker.o libdynamicLinker.a test.lib test.dSYM
 
-test: dynamicLinker.o dynamicLinker.hpp test.cpp Makefile test.lib
-	$(CXX) $(CXXFLAGS) test.cpp dynamicLinker.o -o test $(LDLIBS)
+test: libdynamicLinker.a dynamicLinker.hpp test.cpp Makefile test.lib
+	$(CXX) $(CXXFLAGS) test.cpp -o test -L. -ldynamicLinker $(LDLIBS)
 	./test
 
 test.lib: testLib.c Makefile
