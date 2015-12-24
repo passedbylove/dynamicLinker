@@ -30,7 +30,7 @@ clean:
 	rm -rf test dynamicLinker.o libdynamicLinker.a test.lib test.dSYM
 
 test: libdynamicLinker.a dynamicLinker.hpp test.cpp Makefile test.lib
-	$(CXX) $(CXXFLAGS) test.cpp -o test -ldynamicLinker $(LDLIBS)
+	$(CXX) $(CXXFLAGS) test.cpp -o test -L. -ldynamicLinker $(LDLIBS)
 	./test
 
 test.lib: testLib.c Makefile
