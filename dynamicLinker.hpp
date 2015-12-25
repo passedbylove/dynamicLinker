@@ -40,6 +40,11 @@ namespace dynamicLinker {
     closedException() : dynamicLinkerException("ERROR: Library was not opened!") {}
   };
 
+  class symbolInitException : public dynamicLinkerException {
+  public:
+    symbolInitException() : dynamicLinkerException("ERROR: Symbol was not initialized!") {}
+  };
+
   class dynamicLinker : public std::enable_shared_from_this<dynamicLinker> {
   private:
 
@@ -60,14 +65,30 @@ namespace dynamicLinker {
     private:
       std::function< R(A...) > sym = nullptr;
       std::shared_ptr<dynamicLinker> parent = nullptr;
+      std::string name = "";
     public:
-      dlSymbol( std::shared_ptr<dynamicLinker> p, std::function< R(A...) > s )
-        : sym(s), parent(p) {}
+      dlSymbol( std::shared_ptr<dynamicLinker> p, std::string n )
+        : parent(p), name(n) {}
       R operator()(A... arg) {
-        return sym(arg...);
+        if( sym != nullptr )
+          return sym(arg...);
+        throw symbolInitException();
       }
       std::function< R(A...) > raw() {
         return sym;
+      }
+      void init() {
+
+        if( parent->lib == nullptr )
+          throw closedException();
+
+        sym = std::function< R(A...) >(reinterpret_cast<  R(*)(A...)  >(  dlsym(parent->lib->ptr(), name.c_str())  ));
+
+        if( sym == nullptr ) {
+          char* err = dlerror();
+          std::string s = (err == nullptr) ? "FATAL ERROR: No error!" : std::string(err);
+          throw symbolException(s);
+        }
       }
     };
 
@@ -81,18 +102,7 @@ namespace dynamicLinker {
     ~dynamicLinker();
     bool open();
     template<typename T> dlSymbol<T> getFunction( std::string name ) {
-
-      if( lib == nullptr )
-        throw closedException();
-
-      auto sym = dlSymbol<T>( shared_from_this(), std::function< T >(reinterpret_cast<  T*  >(  dlsym(lib->ptr(), name.c_str())  )) );
-
-      if( sym.raw() == nullptr ) {
-        char* err = dlerror();
-        std::string s = (err == nullptr) ? "FATAL ERROR: No error!" : std::string(err);
-        throw symbolException(s);
-      }
-      return sym;
+      return dlSymbol<T>( shared_from_this(), name);
     }
   };
 

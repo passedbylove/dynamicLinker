@@ -19,6 +19,7 @@ bool openException_test1() {
   try {
     dl->open();
     auto f = dl->getFunction< sum_type >("sum");
+    f.init();
     std::cout << f( 2, 3 ) << std::endl;
   } catch( dynamicLinker::dynamicLinkerException e ) {
     std::cerr << "OK! Catched error from dl: " << e.what() << std::endl;
@@ -37,6 +38,7 @@ bool symbolException_test1() {
   try {
     dl->open();
     auto f = dl->getFunction< sum_type >("sum_");
+    f.init();
     std::cout << f( 2, 3 ) << std::endl;
   } catch( dynamicLinker::dynamicLinkerException e ) {
     std::cerr << "OK! Catched error from dl: " << e.what() << std::endl;
@@ -52,9 +54,11 @@ int working_test1() {
   const std::string path = "./test.lib";
 
   auto dl = dynamicLinker::dynamicLinker::make_new(path);
+  auto f = dl->getFunction< sum_type >("sum");
+
   try {
     dl->open();
-    auto f = dl->getFunction< sum_type >("sum");
+    f.init();
     result = f( 2, 3 );
   } catch( dynamicLinker::dynamicLinkerException e ) {
     std::cerr << e.what() << std::endl;
@@ -73,6 +77,7 @@ int working_test2() {
       auto dl = dynamicLinker::dynamicLinker::make_new(path);
       dl->open();
       auto f = dl->getFunction< sum_type >("sum");
+      f.init();
       dl.reset();  // dl is not deleted, because f have shared_ptr to it
       result = f( 2, 3 );
     }
