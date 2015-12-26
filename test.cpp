@@ -15,14 +15,14 @@ bool openException_test1() {
 
   const std::string path = "./test_.lib";
   auto dl = dynamicLinker::dynamicLinker::make_new(path);
+  auto f = dl->getFunction< sum_type >("sum");
 
   try {
     dl->open();
-    auto f = dl->getFunction< sum_type >("sum");
     f.init();
     std::cout << f( 2, 3 ) << std::endl;
   } catch( dynamicLinker::dynamicLinkerException e ) {
-    std::cerr << "OK! Catched error from dl: " << e.what() << std::endl;
+    //std::cerr << "OK! Catched exception from dl: " << e.what() << std::endl;
     catched = true;
   }
 
@@ -34,14 +34,50 @@ bool symbolException_test1() {
 
   const std::string path = "./test.lib";
   auto dl = dynamicLinker::dynamicLinker::make_new(path);
+  auto f = dl->getFunction< sum_type >("sum_");
 
   try {
     dl->open();
-    auto f = dl->getFunction< sum_type >("sum_");
     f.init();
     std::cout << f( 2, 3 ) << std::endl;
   } catch( dynamicLinker::dynamicLinkerException e ) {
-    std::cerr << "OK! Catched error from dl: " << e.what() << std::endl;
+    //std::cerr << "OK! Catched exception from dl: " << e.what() << std::endl;
+    catched = true;
+  }
+
+  return catched;
+}
+
+bool closedException_test1() {
+  bool catched = false;
+
+  const std::string path = "./test.lib";
+  auto dl = dynamicLinker::dynamicLinker::make_new(path);
+  auto f = dl->getFunction< sum_type >("sum");
+
+  try {
+    f.init();
+    std::cout << f( 2, 3 ) << std::endl;
+  } catch( dynamicLinker::dynamicLinkerException e ) {
+    //std::cerr << "OK! Catched exception from dl: " << e.what() << std::endl;
+    catched = true;
+  }
+
+  return catched;
+}
+
+bool symbolInitException_test1() {
+  bool catched = false;
+
+  const std::string path = "./test.lib";
+  auto dl = dynamicLinker::dynamicLinker::make_new(path);
+  auto f = dl->getFunction< sum_type >("sum");
+
+  try {
+    dl->open();
+    std::cout << f( 2, 3 ) << std::endl;
+  } catch( dynamicLinker::dynamicLinkerException e ) {
+    //std::cerr << "OK! Catched exception from dl: " << e.what() << std::endl;
     catched = true;
   }
 
@@ -71,16 +107,14 @@ int working_test2() {
   int result = 0;
 
   const std::string path = "./test.lib";
+  auto dl = dynamicLinker::dynamicLinker::make_new(path);
+  auto f = dl->getFunction< sum_type >("sum");
 
   try {
-    {
-      auto dl = dynamicLinker::dynamicLinker::make_new(path);
-      dl->open();
-      auto f = dl->getFunction< sum_type >("sum");
-      f.init();
-      dl.reset();  // dl is not deleted, because f have shared_ptr to it
-      result = f( 2, 3 );
-    }
+    dl->open();
+    dl.reset();  // dl is not deleted, because f have shared_ptr to it
+    f.init();
+    result = f( 2, 3 );
   } catch( dynamicLinker::dynamicLinkerException e ) {
     std::cerr << e.what() << std::endl;
   }
@@ -88,18 +122,36 @@ int working_test2() {
   return result;
 }
 
-int main() {
-
+int test() {
   int value = 5;
 
   if( !openException_test1() )
     return 1;
   if( !symbolException_test1() )
     return 2;
-  if( working_test1() != value )
+  if( !closedException_test1() )
     return 3;
-  if ( working_test2() != value )
+  if( !symbolInitException_test1() )
     return 4;
+  if( working_test1() != value )
+    return 5;
+  if ( working_test2() != value )
+    return 6;
 
   return 0;
+}
+
+int main() {
+
+  int status = test();
+
+  if( status == 0 ) {
+    std::cout << "Test passed." << std::endl;
+  } else {
+    std::cerr << "Test failed!" << std::endl;
+    return status;
+  }
+
+  return 0;
+
 }
