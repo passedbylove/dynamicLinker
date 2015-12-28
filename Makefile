@@ -15,7 +15,7 @@ else
   SONAME = -soname
 endif
 
-.PHONY: all clean install
+.PHONY: all clean install build-test test
 
 all: libdynamicLinker.a Makefile
 
@@ -29,9 +29,13 @@ install: libdynamicLinker.a Makefile
 clean:
 	rm -rf test dynamicLinker.o libdynamicLinker.a test.lib test.dSYM
 
-test: libdynamicLinker.a dynamicLinker.hpp test.cpp Makefile test.lib
-	$(CXX) $(CXXFLAGS) test.cpp -o test -L. -ldynamicLinker $(LDLIBS)
-	./test
+test: test.bin Makefile test.lib
+	./test.bin
+
+build-test: test.bin Makefile test.lib
+
+test.bin: libdynamicLinker.a dynamicLinker.hpp test.cpp Makefile
+	$(CXX) $(CXXFLAGS) test.cpp -o test.bin -L. -ldynamicLinker $(LDLIBS)
 
 test.lib: testLib.c Makefile
 	$(CC) -shared -Wl,$(SONAME),test.lib -o test.lib -Wall -Wextra -pedantic -fPIC testLib.c
