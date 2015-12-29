@@ -63,12 +63,14 @@ namespace dynamicLinker {
 
     template<typename R, typename ...A> class dlSymbol< R(A...) >  {
     private:
-      std::function< R(A...) > sym = nullptr;
+      std::function< R(A...) > sym;
       std::shared_ptr<dynamicLinker> parent = nullptr;
       std::string name = "";
     public:
       dlSymbol( std::shared_ptr<dynamicLinker> p, std::string n )
-        : parent(p), name(n) {}
+        : parent(p), name(n) {
+          sym = std::function< R(A...) >(nullptr);
+        }
       R operator()(A... arg) {
         if( sym != nullptr )
           return sym(arg...);
