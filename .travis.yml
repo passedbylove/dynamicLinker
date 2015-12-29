@@ -11,4 +11,20 @@ compiler:
   - clang
   - gcc
 
-script: make && make test
+matrix:
+  include:
+    - os: linux
+      compiler: clang
+      env: ANALYZE=true
+    - os: osx
+      compiler: clang
+      env: ANALYZE=true
+
+before_script:
+  - if [ "$TRAVIS_OS_NAME" = "linux" ] && [ "$ANALYZE" = "true" ]; then sudo apt-get update -qq; sudo apt-get install -qq clang-3.5; fi
+  - if [ "$TRAVIS_OS_NAME" = "osx" ] && [ "$ANALYZE" = "true" ]; then brew update; brew install -v llvm35 --with-clang; fi
+
+script:
+  - if [ "$ANALYZE" = "true" ]; then scan-build-3.5 make; else make; fi
+  - if [ "$ANALYZE" = "true" ]; then scan-build-3.5 make build-test; else make build-test; fi
+  - make test
