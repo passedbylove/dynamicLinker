@@ -1,5 +1,9 @@
 language: cpp
 
+notifications:
+  email: false
+
+
 sudo: required
 dist: trusty
 
