@@ -3,9 +3,10 @@
 #  Licensed under the MIT license. See LICENSE file in the project root for full license information.
 #
 
-CC = clang
-CXX = clang++
-CXXFLAGS = -Wall -Wextra -Werror -std=c++11
+CC ?= clang
+CXX ?= clang++
+override CXXFLAGS += -Wall -Wextra -Werror -std=c++11
+override CFLAGS += -Wall -Wextra -pedantic
 LDLIBS = -ldl
 
 OS_NAME = $(shell uname -s)
@@ -38,4 +39,4 @@ test.bin: libdynamicLinker.a dynamicLinker.hpp test.cpp Makefile
 	$(CXX) $(CXXFLAGS) test.cpp -o test.bin -L. -ldynamicLinker $(LDLIBS)
 
 test.lib: testLib.c Makefile
-	$(CC) -shared -Wl,$(SONAME),test.lib -o test.lib -Wall -Wextra -pedantic -fPIC testLib.c
+	$(CC) -shared -Wl,$(SONAME),test.lib -o test.lib $(CFLAGS) -fPIC testLib.c
