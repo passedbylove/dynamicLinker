@@ -46,7 +46,7 @@ namespace dynamicLinker {
 
   dynamicLinker::_void::~_void() {
     if( myself != nullptr )
-      free(myself);
+      std::free(myself);
   }
 
   void * dynamicLinker::_void::ptr() const {

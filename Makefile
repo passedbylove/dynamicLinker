@@ -7,7 +7,7 @@ CC ?= clang
 CXX ?= clang++
 override CXXFLAGS += -Wall -Wextra -Werror -std=c++11
 override CFLAGS += -Wall -Wextra -pedantic
-LDLIBS = -ldl
+override LDLIBS += -ldl
 
 OS_NAME = $(shell uname -s)
 ifeq ($(OS_NAME), Darwin)

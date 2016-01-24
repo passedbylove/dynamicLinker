@@ -30,13 +30,13 @@ matrix:
 before_script:
   - if [ "$TRAVIS_OS_NAME" = "linux" ]; then sudo apt-get update -qq; sudo apt-get install -qq valgrind; fi
   - if [ "$TRAVIS_OS_NAME" = "osx" ]; then brew update; brew install -v valgrind; fi
-  - export SCAN_BUILD=""
+  - export SCAN_BUILD=""; export COVERAGE=""; export LCOV=""
   - if [ "$TRAVIS_OS_NAME" = "linux" ] && [ "$ANALYZE" = "true" ]; then sudo apt-get update -qq; sudo apt-get install -qq clang-3.5; export SCAN_BUILD=scan-build-3.5; fi
   - if [ "$TRAVIS_OS_NAME" = "osx" ] && [ "$ANALYZE" = "true" ]; then brew update; brew install -v llvm37; export SCAN_BUILD=scan-build-3.7; fi
-  - if [ "$COVERALLS" = "true" ]; then pip install --user cpp-coveralls; export COVERAGE=--coverage; fi
+  - if [ "$COVERALLS" = "true" ]; then pip install --user cpp-coveralls; export COVERAGE=--coverage; export LCOV="-lgcov"; fi
 
 script:
   - $SCAN_BUILD make CXXFLAGS="$COVERAGE"
-  - $SCAN_BUILD make build-test CXXFLAGS="$COVERAGE" CFLAGS="$COVERAGE"
+  - $SCAN_BUILD make build-test LDLIBS="$LCOV"
   - valgrind --error-exitcode=1 ./test.bin
   - if [ "$COVERALLS" = "true" ]; then coveralls --exclude lib --exclude tests --gcov-options '\-lp'; fi
