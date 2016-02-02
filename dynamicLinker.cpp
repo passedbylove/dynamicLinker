@@ -33,8 +33,8 @@ namespace dynamicLinker {
 
   dynamicLinker::~dynamicLinker() {
     if( lib != nullptr ) {
-      if( dlclose( lib->ptr() ) < 0 ) {
-        // maybe now we should free lib->ptr() ?
+      if( dlclose( lib->ptr() ) != 0 ) {
+        lib.reset();
         return;
       }
       lib->null();
@@ -45,8 +45,10 @@ namespace dynamicLinker {
   dynamicLinker::_void::_void( void * ptr ) : myself(ptr) {}
 
   dynamicLinker::_void::~_void() {
-    if( myself != nullptr )
+    if( myself != nullptr ) {
       std::free(myself);
+      myself = nullptr;
+    }
   }
 
   void * dynamicLinker::_void::ptr() const {
