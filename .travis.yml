@@ -3,40 +3,25 @@ language: cpp
 notifications:
   email: false
 
+sudo: false
 
-sudo: required
-dist: trusty
+os: linux
 
-os:
-  - linux
-  - osx
+compiler: clang
 
-compiler:
-  - clang
-  - gcc
+env:
+  global:
+    - secure: "QfDAOpm66jdxoZS1UBmg7JpdhY43icm5jc1pFilOQV5ITpl9fjsj5olV1oGXFw1z2cuEHW7hWvEdbAWnwfh3Q2gU3ZJc4FG6BSFmEpDSzTOAtp17FPGyvYgmt34wmRwLU8Ieb2GCexciKixeOualiRp7LyEthd9DUAVv8rvnhjUWG6nsPN/4zwt2r4Ixhl5FaBIUZZ0LTe9fsjs8rXvwPKZnoXmOiZrzOZP8Uba9CrgRwDkMDbegL7F4wHUeGDv+BNxsEMOVNtD5bJ9f/zh3+A0+pUZNpWzbLr5G2oQbnOHxfMR2ASISRX7cAGq44dHcHFMJqN5hKd3zSdRyePWGh84+k6+ZJdGQ1mdnG5YaVVoLwcJESVOoGpDLATBFouehhfiH7T+rUnRXL96pVmvOQNIViDgrDToI9SKi1B3I1oulbA252RBrrzb5ancKHPUmeRtxqD6k1y8Cf1egtLbDHaDrtovZvX8OfkBDlQseY2r8FwUFe+xU58+wrbkFWSPiUuzI4uUrk1k60gJXgp82CrL2FCI69AD6J7aT1eX5P66XCPuw4C3JmnEgGaxp9ONgNwwXVv+TlVgiKjOH9dhFEzambBcNSOhK2d47cOV+3u274/GZjtJ9qKTe3tTlm3xkaKvRgf5Tx1U4cHHiQtKByFTVUCZf5vIXDW2VkHyaL2o="
 
-matrix:
-  include:
-    - os: linux
-      compiler: clang
-      env: ANALYZE=true
-    - os: osx
-      compiler: clang
-      env: ANALYZE=true
-    - os: linux
-      compiler: gcc
-      env: COVERALLS=true
+addons:
+  apt:
+    packages:
+      - clang-3.5
+  coverity_scan:
+    project:
+      name: "Marqin/dynamicLinker"
+    notification_email: "$COVERITY_SCAN_NOTIFICATION_EMAIL"
+    build_command: "make"
+    branch_pattern: coverity_scan
 
-before_script:
-  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then sudo apt-get update -qq; sudo apt-get install -qq valgrind; fi
-  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then brew update; brew install -v valgrind; fi
-  - export SCAN_BUILD=""; export COVERAGE=""; export LCOV=""
-  - if [ "$TRAVIS_OS_NAME" = "linux" ] && [ "$ANALYZE" = "true" ]; then sudo apt-get update -qq; sudo apt-get install -qq clang-3.5; export SCAN_BUILD=scan-build-3.5; fi
-  - if [ "$TRAVIS_OS_NAME" = "osx" ] && [ "$ANALYZE" = "true" ]; then brew update; brew install -v llvm37; export SCAN_BUILD=scan-build-3.7; fi
-  - if [ "$COVERALLS" = "true" ]; then pip install --user cpp-coveralls; export COVERAGE=--coverage; export LCOV="-lgcov"; fi
-
-script:
-  - $SCAN_BUILD make CXXFLAGS="$COVERAGE"
-  - $SCAN_BUILD make build-test CXXFLAGS="$COVERAGE" CFLAGS="$COVERAGE" LDLIBS="$LCOV"
-  - valgrind --error-exitcode=1 ./test.bin
-  - if [ "$COVERALLS" = "true" ]; then coveralls --exclude "test.cpp" --gcov-options '\-lp'; fi
+script: if [ "${COVERITY_SCAN_BRANCH}" != 1 ]; then echo "Something went wrong..." ; fi
