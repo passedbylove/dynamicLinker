@@ -7,6 +7,10 @@
   #error THIS SOFTWARE IS ONLY FOR UNIX-LIKE SYSTEMS!
 #endif
 
+#if defined ( __GNUC__ ) && not defined ( __clang__ ) &&  __GNUC__ == 4 && ( __GNUC_MINOR__ < 8 || (  __GNUC_MINOR__ == 8 && __GNUC_PATCHLEVEL__ < 2 ) )
+  #error GCC < 4.8.2 IS NOT SUPPORTED
+#endif
+
 #pragma once
 
 #include <memory>
