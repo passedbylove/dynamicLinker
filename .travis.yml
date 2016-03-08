@@ -43,4 +43,4 @@ script:
   - $SCAN_BUILD make CXXFLAGS="-g $COVERAGE"
   - $SCAN_BUILD make build-test CXXFLAGS="-g $COVERAGE" CFLAGS="$COVERAGE" LDLIBS="$LCOV"
   - valgrind --error-exitcode=1 ./test.bin
-  - if [ "$COVERALLS" = "true" ]; then coveralls --exclude "test.cpp" --gcov-options '\-lp'; fi
+  - if [ "$COVERALLS" = "true" ]; then coveralls --gcov $(which gcov-4.9) --exclude "test.cpp" --gcov-options '\-lp'; fi
