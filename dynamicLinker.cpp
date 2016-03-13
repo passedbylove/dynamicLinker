@@ -7,6 +7,22 @@
 
 namespace dynamicLinker {
 
+  bool dynamicLinker::closeLib() {
+#ifdef _WIN32
+  return FreeLibrary( (HINSTANCE) lib->ptr() );
+#else
+  return (! dlclose( lib->ptr() ));
+#endif
+  }
+
+  void * dynamicLinker::openLib() {
+#ifdef _WIN32
+  return LoadLibrary( libPath.c_str() );
+#else
+  return dlopen( libPath.c_str(), RTLD_NOW | RTLD_LOCAL );
+#endif
+  }
+
   dynamicLinker::dynamicLinker( std::string path ) : libPath(path) {
   }
 
@@ -18,12 +34,12 @@ namespace dynamicLinker {
   bool dynamicLinker::open() {
     // C++14:
     // lib = std::make_unique<_void>( dlopen( libPath.c_str(), RTLD_NOW | RTLD_LOCAL ) );
-    _void * v = new _void( dlopen( libPath.c_str(), RTLD_NOW | RTLD_LOCAL ) );
+    _void * v = new _void( openLib() );
     lib = std::unique_ptr<_void>( v );
 
     if ( lib->ptr() == nullptr ) {
       lib = nullptr;
-      char* err = dlerror();
+      char* err = nullptr;  //dlerror();
       std::string s = (err == nullptr) ? "FATAL ERROR: no error!" : std::string(err);
       throw openException(s);
     }
@@ -33,7 +49,7 @@ namespace dynamicLinker {
 
   dynamicLinker::~dynamicLinker() {
     if( lib != nullptr ) {
-      if( dlclose( lib->ptr() ) != 0 ) {
+      if( ! closeLib() ) {
         lib.reset();
         return;
       }

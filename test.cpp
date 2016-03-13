@@ -3,6 +3,12 @@
  *  Licensed under the MIT license. See LICENSE file in the project root for full license information.
  */
 
+#ifdef _WIN32
+  #define TEST_LIB "./test.dll"
+#else
+  #define TEST_LIB "./test.lib"
+#endif
+
 #include "dynamicLinker.hpp"
 #include <iostream>
 #include <memory>
@@ -13,7 +19,7 @@ typedef int sum_type ( int x, int y );
 bool openException_test1() {
   bool catched = false;
 
-  const std::string path = "./test_.lib";
+  const std::string path = "./none.lib";
   auto dl = dynamicLinker::dynamicLinker::make_new(path);
   auto f = dl->getFunction< sum_type >("sum");
 
@@ -32,7 +38,7 @@ bool openException_test1() {
 bool symbolException_test1() {
   bool catched = false;
 
-  const std::string path = "./test.lib";
+  const std::string path = TEST_LIB;
   auto dl = dynamicLinker::dynamicLinker::make_new(path);
   auto f = dl->getFunction< sum_type >("sum_");
 
@@ -51,7 +57,7 @@ bool symbolException_test1() {
 bool closedException_test1() {
   bool catched = false;
 
-  const std::string path = "./test.lib";
+  const std::string path = TEST_LIB;
   auto dl = dynamicLinker::dynamicLinker::make_new(path);
   auto f = dl->getFunction< sum_type >("sum");
 
@@ -69,7 +75,7 @@ bool closedException_test1() {
 bool symbolInitException_test1() {
   bool catched = false;
 
-  const std::string path = "./test.lib";
+  const std::string path = TEST_LIB;
   auto dl = dynamicLinker::dynamicLinker::make_new(path);
   auto f = dl->getFunction< sum_type >("sum");
 
@@ -87,7 +93,7 @@ bool symbolInitException_test1() {
 int working_test1() {
   int result = 0;
 
-  const std::string path = "./test.lib";
+  const std::string path = TEST_LIB;
 
   auto dl = dynamicLinker::dynamicLinker::make_new(path);
   auto f = dl->getFunction< sum_type >("sum");
@@ -106,7 +112,7 @@ int working_test1() {
 int working_test2() {
   int result = 0;
 
-  const std::string path = "./test.lib";
+  const std::string path = TEST_LIB;
   auto dl = dynamicLinker::dynamicLinker::make_new(path);
   auto f = dl->getFunction< sum_type >("sum");
 

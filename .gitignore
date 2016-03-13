@@ -3,3 +3,5 @@ test.lib
 dynamicLinker.o
 test.bin.dSYM
 libdynamicLinker.a
+test.dll
+a.exe

@@ -3,9 +3,9 @@
  *  Licensed under the MIT license. See LICENSE file in the project root for full license information.
  */
 
-#if not defined (__unix__) && not defined(__unix) && not defined (unix) && ( (not defined (__APPLE__) || not defined (__MACH__)) )
-  #error THIS SOFTWARE IS ONLY FOR UNIX-LIKE SYSTEMS!
-#endif
+// #if not defined (__unix__) && not defined(__unix) && not defined (unix) && ( (not defined (__APPLE__) || not defined (__MACH__)) )
+//   #error THIS SOFTWARE IS ONLY FOR UNIX-LIKE SYSTEMS!
+// #endif
 
 #if defined ( __GNUC__ ) && not defined ( __clang__ ) &&  __GNUC__ == 4 && ( __GNUC_MINOR__ < 8 || (  __GNUC_MINOR__ == 8 && __GNUC_PATCHLEVEL__ < 2 ) )
   #error GCC < 4.8.2 IS NOT SUPPORTED
@@ -15,9 +15,14 @@
 
 #include <memory>
 #include <iostream>
-#include <dlfcn.h>
 #include <functional>
 #include <stdexcept>
+
+#ifdef _WIN32
+  #include <windows.h>
+#else
+  #include <dlfcn.h>
+#endif
 
 namespace dynamicLinker {
 
@@ -52,6 +57,9 @@ namespace dynamicLinker {
   class dynamicLinker : public std::enable_shared_from_this<dynamicLinker> {
   private:
 
+    bool closeLib();
+    void * openLib();
+
     class _void {
     private:
       void * myself = nullptr;
@@ -70,6 +78,7 @@ namespace dynamicLinker {
       std::function< R(A...) > sym;
       std::shared_ptr<dynamicLinker> parent = nullptr;
       std::string name = "";
+
     public:
       dlSymbol( std::shared_ptr<dynamicLinker> p, std::string n )
         : parent(p), name(n) {
@@ -88,10 +97,15 @@ namespace dynamicLinker {
         if( parent->lib == nullptr )
           throw closedException();
 
-        sym = std::function< R(A...) >(reinterpret_cast<  R(*)(A...)  >(  dlsym(parent->lib->ptr(), name.c_str())  ));
+#ifdef _WIN32
+        sym = std::function< R(A...) >(reinterpret_cast<  R(*)(A...)  >( GetProcAddress( (HINSTANCE) parent->lib->ptr() , name.c_str() ) ));
+#else
+        sym = std::function< R(A...) >(reinterpret_cast<  R(*)(A...)  >( dlsym( parent->lib->ptr(), name.c_str() ) ));
+#endif
+
 
         if( sym == nullptr ) {
-          char* err = dlerror();
+          char* err = nullptr;  //dlerror();
           std::string s = (err == nullptr) ? "FATAL ERROR: No error!" : std::string(err);
           throw symbolException(s);
         }
