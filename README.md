@@ -6,9 +6,11 @@
 [![Average time to resolve an issue](http://isitmaintained.com/badge/resolution/Marqin/dynamicLinker.svg)](http://isitmaintained.com/project/Marqin/dynamicLinker "Average time to resolve an issue")
 [![Coverage Status](https://coveralls.io/repos/github/Marqin/dynamicLinker/badge.svg?branch=master)](https://coveralls.io/github/Marqin/dynamicLinker?branch=master)
 
-C++11 wrapper for POSIX dynamic linking ( for dlfcn.h ).
+C++11 wrapper for Linux / OS X / Windows / BSD dynamic libraries ( .so .dylib .dll ).
 
 ## Compilation
+
+For Windows please go to [Windows.md](https://github.com/Marqin/dynamicLinker/blob/master/Windows.md)
 
 **GCC NOTE**: gcc before 4.8.2 had a [bug](https://gcc.gnu.org/bugzilla/show_bug.cgi?id=57465) that could cause dynamicLinker to crash! Please use newer versions of GCC.
 
