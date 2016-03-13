@@ -15,9 +15,6 @@ compiler:
 
 matrix:
   include:
-    - os: linux
-      compiler: clang
-      env: ANALYZE=true
     - os: osx
       compiler: clang
       env: ANALYZE=true
@@ -32,7 +29,6 @@ addons:
     packages:
       - valgrind
       - g++-4.9
-      - clang-3.5  # for scan-build
 
 install:
   - if [ "$CXX" = "g++" ]; then export CXX="g++-4.9" CC="gcc-4.9"; fi
@@ -40,7 +36,6 @@ install:
 before_script:
   - if [ "$TRAVIS_OS_NAME" = "osx" ]; then brew update; brew install -v valgrind; fi
   - export SCAN_BUILD=""; export COVERAGE=""; export LCOV=""
-  - if [ "$TRAVIS_OS_NAME" = "linux" ] && [ "$ANALYZE" = "true" ]; then export SCAN_BUILD=scan-build; fi
   - if [ "$TRAVIS_OS_NAME" = "osx" ] && [ "$ANALYZE" = "true" ]; then brew update; brew install -v llvm37; export SCAN_BUILD=scan-build-3.7; fi
   - if [ "$COVERALLS" = "true" ]; then pip install --user cpp-coveralls; export COVERAGE=--coverage; export LCOV="-lgcov"; fi
 
@@ -48,4 +43,4 @@ script:
   - $SCAN_BUILD make CXXFLAGS="-g $COVERAGE"
   - $SCAN_BUILD make build-test CXXFLAGS="-g $COVERAGE" CFLAGS="$COVERAGE" LDLIBS="$LCOV"
   - valgrind --error-exitcode=1 ./test.bin
-  - if [ "$COVERALLS" = "true" ]; then coveralls --exclude "test.cpp" --gcov-options '\-lp'; fi
+  - if [ "$COVERALLS" = "true" ]; then coveralls --gcov $(which gcov-4.9) --exclude "test.cpp" --gcov-options '\-lp'; fi

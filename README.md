@@ -10,6 +10,8 @@ C++11 wrapper for POSIX dynamic linking ( for dlfcn.h ).
 
 ## Compilation
 
+**GCC NOTE**: gcc before 4.8.2 had a [bug](https://gcc.gnu.org/bugzilla/show_bug.cgi?id=57465) that could cause dynamicLinker to crash! Please use newer versions of GCC.
+
 You **need** compiler with full C++11 support.
 
 ```make``` ( or ```make CXX=g++ CC=gcc``` if you don't have clang compiler )
