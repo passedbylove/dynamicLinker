@@ -24,30 +24,30 @@ namespace dynamicLinker {
 
   class dynamicLinkerException : public std::runtime_error {
   public:
-    dynamicLinkerException ( const std::string& what_arg ) :
+    explicit dynamicLinkerException ( const std::string& what_arg ) :
       std::runtime_error( what_arg ) {}
-    dynamicLinkerException ( const char* what_arg ) :
+    explicit dynamicLinkerException ( const char* what_arg ) :
       std::runtime_error( what_arg ) {}
   };
 
   class openException : public dynamicLinkerException {
   public:
-    openException(std::string s) : dynamicLinkerException("ERROR: Cannot open dynamic library: " + s) {}
+    explicit openException(std::string s) : dynamicLinkerException("ERROR: Cannot open dynamic library: " + s) {}
   };
 
   class symbolException : public dynamicLinkerException {
   public:
-    symbolException(std::string s) : dynamicLinkerException("ERROR: Cannot find symbol: " + s) {}
+    explicit symbolException(std::string s) : dynamicLinkerException("ERROR: Cannot find symbol: " + s) {}
   };
 
   class closedException : public dynamicLinkerException {
   public:
-    closedException() : dynamicLinkerException("ERROR: Library was not opened!") {}
+    explicit closedException() : dynamicLinkerException("ERROR: Library was not opened!") {}
   };
 
   class symbolInitException : public dynamicLinkerException {
   public:
-    symbolInitException() : dynamicLinkerException("ERROR: Symbol was not initialized!") {}
+    explicit symbolInitException() : dynamicLinkerException("ERROR: Symbol was not initialized!") {}
   };
 
   class dynamicLinker : public std::enable_shared_from_this<dynamicLinker> {
@@ -60,7 +60,7 @@ namespace dynamicLinker {
     private:
       void * myself = nullptr;
     public:
-      _void( void * );
+      explicit _void( void * );
       ~_void();
       void * ptr() const;
       void null();
@@ -88,8 +88,9 @@ namespace dynamicLinker {
           sym = std::function< R(A...) >(nullptr);
         }
       R operator()(A... arg) {
-        if( sym != nullptr )
+        if( sym != nullptr ) {
           return sym(arg...);
+        }
         throw symbolInitException();
       }
       std::function< R(A...) > raw() {
@@ -114,7 +115,7 @@ namespace dynamicLinker {
     std::string libPath = "";
     std::unique_ptr<_void> lib = nullptr;
     dynamicLinker();
-    dynamicLinker( std::string );
+    explicit dynamicLinker( std::string );
   public:
     static std::shared_ptr<dynamicLinker> make_new( std::string );
     ~dynamicLinker();
@@ -124,4 +125,4 @@ namespace dynamicLinker {
     }
   };
 
-};
+}; // namespace dynamicLinker

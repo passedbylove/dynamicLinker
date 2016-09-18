@@ -34,7 +34,7 @@ namespace dynamicLinker {
   bool dynamicLinker::open() {
     // C++14:
     // lib = std::make_unique<_void>( dlopen( libPath.c_str(), RTLD_NOW | RTLD_LOCAL ) );
-    _void * v = new _void( openLib() );
+    auto v = new _void( openLib() );
     lib = std::unique_ptr<_void>( v );
 
     if ( lib->ptr() == nullptr ) {
@@ -75,4 +75,4 @@ namespace dynamicLinker {
     myself = nullptr;
   }
 
-}
+}; // namespace dynamicLinker

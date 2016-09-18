@@ -27,7 +27,7 @@ bool openException_test1() {
     dl->open();
     f.init();
     std::cout << f( 2, 3 ) << std::endl;
-  } catch( dynamicLinker::dynamicLinkerException e ) {
+  } catch( const dynamicLinker::dynamicLinkerException& e ) {
     //std::cerr << "OK! Catched exception from dl: " << e.what() << std::endl;
     catched = true;
   }
@@ -46,7 +46,7 @@ bool symbolException_test1() {
     dl->open();
     f.init();
     std::cout << f( 2, 3 ) << std::endl;
-  } catch( dynamicLinker::dynamicLinkerException e ) {
+  } catch( const dynamicLinker::dynamicLinkerException& e ) {
     //std::cerr << "OK! Catched exception from dl: " << e.what() << std::endl;
     catched = true;
   }
@@ -64,7 +64,7 @@ bool closedException_test1() {
   try {
     f.init();
     std::cout << f( 2, 3 ) << std::endl;
-  } catch( dynamicLinker::dynamicLinkerException e ) {
+  } catch( const dynamicLinker::dynamicLinkerException& e ) {
     //std::cerr << "OK! Catched exception from dl: " << e.what() << std::endl;
     catched = true;
   }
@@ -82,7 +82,7 @@ bool symbolInitException_test1() {
   try {
     dl->open();
     std::cout << f( 2, 3 ) << std::endl;
-  } catch( dynamicLinker::dynamicLinkerException e ) {
+  } catch( const dynamicLinker::dynamicLinkerException& e ) {
     //std::cerr << "OK! Catched exception from dl: " << e.what() << std::endl;
     catched = true;
   }
@@ -102,7 +102,7 @@ int working_test1() {
     dl->open();
     f.init();
     result = f( 2, 3 );
-  } catch( dynamicLinker::dynamicLinkerException e ) {
+  } catch( const dynamicLinker::dynamicLinkerException& e ) {
     std::cerr << e.what() << std::endl;
   }
 
@@ -121,7 +121,7 @@ int working_test2() {
     dl.reset();  // dl is not deleted, because f have shared_ptr to it
     f.init();
     result = f( 2, 3 );
-  } catch( dynamicLinker::dynamicLinkerException e ) {
+  } catch( const dynamicLinker::dynamicLinkerException& e ) {
     std::cerr << e.what() << std::endl;
   }
 
@@ -131,18 +131,24 @@ int working_test2() {
 int test() {
   int value = 5;
 
-  if( !openException_test1() )
+  if( !openException_test1() ) {
     return 1;
-  if( !symbolException_test1() )
+  }
+  if( !symbolException_test1() ) {
     return 2;
-  if( !closedException_test1() )
+  }
+  if( !closedException_test1() ) {
     return 3;
-  if( !symbolInitException_test1() )
+  }
+  if( !symbolInitException_test1() ) {
     return 4;
-  if( working_test1() != value )
+  }
+  if( working_test1() != value ) {
     return 5;
-  if ( working_test2() != value )
+  }
+  if ( working_test2() != value ) {
     return 6;
+  }
 
   return 0;
 }
