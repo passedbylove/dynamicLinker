@@ -98,8 +98,9 @@ namespace dynamicLinker {
       }
       void init() {
 
-        if( parent->lib == nullptr )
+        if( parent->lib == nullptr ) {
           throw closedException();
+        }
 
         sym = std::function< R(A...) >(reinterpret_cast<  R(*)(A...)  >( getSymbol() ));
 
@@ -113,7 +114,7 @@ namespace dynamicLinker {
 
 
     std::string libPath = "";
-    std::unique_ptr<_void> lib = nullptr;
+    std::unique_ptr<_void> lib = std::unique_ptr<_void>(nullptr);
     dynamicLinker();
     explicit dynamicLinker( std::string );
   public:

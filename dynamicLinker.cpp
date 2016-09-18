@@ -11,7 +11,7 @@ namespace dynamicLinker {
 #ifdef _WIN32
   return FreeLibrary( (HINSTANCE) lib->ptr() );
 #else
-  return (! dlclose( lib->ptr() ));
+  return ( dlclose( lib->ptr() ) == 0 );
 #endif
   }
 
