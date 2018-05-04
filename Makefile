@@ -5,7 +5,7 @@
 
 CC ?= clang
 CXX ?= clang++
-override CXXFLAGS += -Wall -Wextra -Werror -std=c++11
+override CXXFLAGS += -Wall -fPIC -Wextra -Werror -std=c++11
 override CFLAGS += -Wall -Wextra -pedantic
 AR ?= ar
 
